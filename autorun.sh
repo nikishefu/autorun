@@ -6,6 +6,7 @@ if [ "$#" == 0 ] || [ "$1" == "--help" ] ; then
     echo -e "\t--help\t\tDisplay this information"
     echo -e "\t--list\t\tDisplay services"
     echo -e "\t--info name\tPrint name.service info"
+    echo -e "\t--status name\tPrint name.service status"
     echo -e "\t-u username\tRun service as username"
     echo -e "\t-n name\t\tName of service (required)"
     echo -e "\t-d\t\tDelete service"
@@ -21,6 +22,13 @@ elif [ "$1" == "--info" ] ; then
 	exit 1
     fi
     echo "`cat /etc/systemd/system/$2.service`"
+    exit 0
+elif [ "$1" == "--status" ] ; then
+    if [ "$#" == 1 ] ; then
+	echo "Specify a name of a service"
+	exit 1
+    fi
+    echo -e "`systemctl status $2.service`"
     exit 0
 fi
 
@@ -63,8 +71,9 @@ if [ ! -z `which ${array[0]}` ] ; then
 	if [ "$index" == 0 ] ; then
 	    executable="`which ${array[0]}`"
 	else
-	    if [ ! -z `realpath ${array[index]}` ] ; then
-		executable="$executable `realpath ${array[index]}`"
+	    path=`realpath ${array[index]}`
+	    if [ ! -z $path ] && [ -e $path ]; then
+		executable="$executable $path"
 	    else
 		executable="$executable ${array[index]}"
 	    fi
@@ -95,8 +104,9 @@ echo -e "ExecStart=$executable\n" >> "$filename"
 echo "[Install]" >> "$filename"
 echo "WantedBy=multi-user.target" >> "$filename"
 
-echo `systemctl enable $name.service`
-if [ "$start" = true ] ; then
-    echo `systemctl start $name.service`
-fi
+`systemctl enable $name.service`
 echo "Service $filename created"
+if [ "$startService" = true ] ; then
+    `systemctl start $name.service`
+    echo "Service $filename started"
+fi
