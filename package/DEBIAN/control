@@ -1,0 +1,5 @@
+Package: autorun
+Version: 0.1
+Maintainer: Nikita Ardashev
+Architecture: amd64
+Description: Script to create and delete systemd services
