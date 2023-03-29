@@ -1,19 +1,26 @@
 #!/bin/bash
 
-if [ "$#" == 0 ] || [ "$1" == "--help" ]
-then
-    echo "Usage: autorun [options] file"
+if [ "$#" == 0 ] || [ "$1" == "--help" ] ; then
+    echo "Usage: [sudo] autorun [options] executable"
     echo "Options:"
     echo -e "\t--help\t\tDisplay this information"
     echo -e "\t--list\t\tDisplay services"
+    echo -e "\t--info name\tPrint name.service info"
     echo -e "\t-u username\tRun service as username"
-    echo -e "\t-n name\t\tName of service"
+    echo -e "\t-n name\t\tName of service (required)"
     echo -e "\t-d\t\tDelete service"
     echo -e "\t-s\t\tStart service after creation"
+    echo "Note: use this script with sudo"
     exit 0
-elif [ "$1" == "--list" ]
-then
-    echo "`ls -l /etc/systemd/system`"
+elif [ "$1" == "--list" ] ; then
+    echo "`ls /etc/systemd/system | grep .service$`"
+    exit 0
+elif [ "$1" == "--info" ] ; then
+    if [ "$#" == 1 ] ; then
+	echo "Specify a name of a service"
+	exit 1
+    fi
+    echo "`cat /etc/systemd/system/$2.service`"
     exit 0
 fi
 
@@ -47,21 +54,39 @@ then
     exit 1
 fi
 
-executable=`realpath "${@: -1}"`
-if [ -x "$executable" ]
-then
-    echo -n "Executable "
-    echo "$executable"
-else
+executable="${@: -1}"
+
+IFS=' ' read -r -a array <<< "$executable"
+if [ ! -z `which ${array[0]}` ] ; then
+    for index in "${!array[@]}"
+    do
+	if [ "$index" == 0 ] ; then
+	    executable="`which ${array[0]}`"
+	else
+	    if [ ! -z `realpath ${array[index]}` ] ; then
+		executable="$executable `realpath ${array[index]}`"
+	    else
+		executable="$executable ${array[index]}"
+	    fi
+	fi
+    done
+elif [ ! -x "$executable" ] ; then
     echo "Error: No such file / file is not executable"
+    exit 1
 fi
+
+echo "Executable: $executable"
 
 echo "[Unit]" > "$filename"
 echo "Description=$name service, created with autorun" >> "$filename"
 echo -e "After=network.target\n" >> "$filename"
 echo "[Service]" >> "$filename"
 echo "Type=simple" >> "$filename"
-echo "User=$user" >> "$filename"
+
+if [ ! -z "$user" ] ; then
+    echo "User=$user" >> "$filename"
+fi
+
 echo "Restart=on-failure" >> "$filename"
 echo "RestartSec=1" >> "$filename"
 echo "StartLimitBurst=5" >> "$filename"
