@@ -1,64 +1,91 @@
 #!/bin/bash
+VERSION="0.3.0"
+RED="\e[0;31m"
+CYAN="\e[0;36m"
+ENDCOLOR="\e[0m"
 
-if [ "$#" == 0 ] || [ "$1" == "--help" ] ; then
-    echo "Usage: [sudo] autorun [options] executable"
-    echo "Options:"
+if [ "$#" == 0 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ] ; then
+    echo -e "${CYAN}autorun$ENDCOLOR is a script to manage systemd services\n"
+    echo -e "${CYAN}Usage:$ENDCOLOR autorun [options] \"executable\""
+    echo -e "${CYAN}Options:$ENDCOLOR"
     echo -e "\t--help\t\tDisplay this information"
-    echo -e "\t--list\t\tDisplay services"
-    echo -e "\t--info name\tPrint name.service info"
-    echo -e "\t--status name\tPrint name.service status"
+    echo -e "\t-v\t\tDisplay version information"
+    echo -e "\t-l\t\tDisplay services"
+    echo -e "\t-i\t\tPrint name.service info"
+    echo -e "\t-s\t\tPrint name.service status"
     echo -e "\t-u username\tRun service as username"
-    echo -e "\t-n name\t\tName of service (required)"
+    echo -e "\t-n name\t\tName of service"
     echo -e "\t-d\t\tDelete service"
-    echo -e "\t-s\t\tStart service after creation"
-    echo "Note: use this script with sudo"
-    exit 0
-elif [ "$1" == "--list" ] ; then
-    echo "`ls /etc/systemd/system | grep .service$`"
-    exit 0
-elif [ "$1" == "--info" ] ; then
-    if [ "$#" == 1 ] ; then
-	echo "Specify a name of a service"
-	exit 1
-    fi
-    echo "`cat /etc/systemd/system/$2.service`"
-    exit 0
-elif [ "$1" == "--status" ] ; then
-    if [ "$#" == 1 ] ; then
-	echo "Specify a name of a service"
-	exit 1
-    fi
-    echo -e "`systemctl status $2.service`"
+    echo -e "\t-r\t\tRun service after creation"
+    echo -e "${CYAN}Note:$ENDCOLOR"
+    echo -e "\t- Some operations require superuser privilege"
+    echo -e "\t- Executable can be either a file or a command"
+    echo -e "\t- If executable contains spaces, surround this parameter by \""
     exit 0
 fi
 
-while getopts "n:u:ds" opt
-do
-   case "$opt" in
-      n ) name="$OPTARG"    ;;
-      u ) user="$OPTARG"    ;;
-      d ) delete=true       ;;
-      s ) startService=true ;;
-   esac
+while getopts "n:u:dsrivl" opt ; do
+case "$opt" in
+    n ) name="$OPTARG"    ;;
+    u ) user="$OPTARG"    ;;
+    d ) delete=true       ;;
+    s ) printStatus=true  ;;
+    i ) printInfo=true    ;;
+    r ) startService=true ;;
+    l ) listServices=true ;;
+    v ) printVersion=true ;;
+esac
 done
 
+
+# Nameless options
+if [ "$printVersion" = true ] ; then
+    echo "autorun version $VERSION"
+    exit 0
+elif [ "$listServices" = true ] ; then
+    echo "`ls /etc/systemd/system | grep .service$`"
+    exit 0
+fi
+
+# The rest of the options require name
 if [ -z "$name" ]
 then
-    echo "Specify a name of a service"
+    echo -e "${RED}Error:$ENDCOLOR Specify a name of a service"
+    exit 1
+fi
+filename="/etc/systemd/system/$name.service"
+
+# Extra options
+if [ "$printStatus" = true ] ; then
+    echo -e "`systemctl status $name.service`"
+    exit 0
+elif [ "$printInfo" = true ] ; then
+    echo "`cat $filename`"
+    exit 0
+fi
+
+if [ "$EUID" -ne 0 ] ; then
+    echo -e "${RED}Error:$ENDCOLOR this operation requires superuser privilege"
     exit 1
 fi
 
-filename="/etc/systemd/system/$name.service"
+if [ "$delete" = true ] ; then
+    if [ -e "$filename" ] ; then
+	echo -n `systemctl stop $name.service`
+	echo -n `systemctl disable $name.service`
+	echo -n `rm $filename`
+	echo "Service $name was deleted"
+	exit 0
+    else
+	echo -e "${RED}Error:$ENDCOLOR Service $name doesn't exist"
+	exit 1
+    fi
+fi
+
+# From here: main option - service creation
 if [ -e "$filename" ]
 then
-    if [ "$delete" = true ] ; then
-        echo -n `systemctl stop $name.service`
-        echo -n `systemctl disable $name.service`
-        echo -n `rm $filename`
-        echo "Service $filename was deleted"
-        exit 0
-    fi
-    echo "$name.service already exists"
+    echo -e "${RED}Error:$ENDCOLOR $name.service already exists"
     exit 1
 fi
 
@@ -80,7 +107,7 @@ if [ ! -z `which ${array[0]}` ] ; then
 	fi
     done
 elif [ ! -x "$executable" ] ; then
-    echo "Error: No such file / file is not executable"
+    echo -e "${RED}Error:$ENDCOLOR No such file / file is not executable"
     exit 1
 fi
 
