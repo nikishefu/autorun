@@ -20,7 +20,8 @@ dpkg -i autorun_0.3.0_amd64.deb
 ```
         --help          Display this information
         -v              Display version information
-        -l              Display services
+        -l              Display all system services
+        -L              Display services created with autorun
         -i              Print name.service info
         -s              Print name.service status
         -u username     Run service as username

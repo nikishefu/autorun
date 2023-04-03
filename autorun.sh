@@ -12,7 +12,7 @@ if [ "$#" == 0 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ] ; then
     echo -e "\t--help\t\tDisplay this information"
     echo -e "\t-v\t\tDisplay version information"
     echo -e "\t-l\t\tDisplay all system services"
-    echo -e "\t-L\t\tDisplay services, created with autorun"
+    echo -e "\t-L\t\tDisplay services created with autorun"
     echo -e "\t-i\t\tPrint name.service info"
     echo -e "\t-s\t\tPrint name.service status"
     echo -e "\t-u username\tRun service as username"
