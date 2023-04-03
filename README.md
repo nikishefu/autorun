@@ -4,12 +4,12 @@ Script to manage systemd services
 ## Installation
 1. Download `.deb` file from releases
 ```
-wget https://github.com/nikishefu/autorun/releases/download/v0.3.0/autorun_0.3.0_amd64.deb
+wget https://github.com/nikishefu/autorun/releases/download/v0.4.0/autorun_0.4.0_amd64.deb
 ```
 
 2. Install via `dpkg`
 ```
-dpkg -i autorun_0.3.0_amd64.deb
+dpkg -i autorun_0.4.0_amd64.deb
 ```
 
 ## Usage
