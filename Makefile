@@ -13,7 +13,8 @@ clean:
 	@rm *.deb
 	@echo "Complete!"
 init:
-	@mkdir -p package/usr/local/bin package/DEBIAN
+	@mkdir -p package/usr/local/bin package/DEBIAN package/etc/autorun
+	@touch package/etc/autorun/services.list
 	@echo "Package: autorun" > package/DEBIAN/control
 	@echo "Version: $(VERSION)" >> package/DEBIAN/control
 	@echo "Maintainer: Nikita Ardashev" >> package/DEBIAN/control
