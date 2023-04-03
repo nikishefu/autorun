@@ -35,6 +35,6 @@ dpkg -i autorun_0.3.0_amd64.deb
 
 #### Example
 ```
-sudo autorun -s -n mypythonserver "python3 -m http.server 9000"
+sudo autorun -r -n mypythonserver "python3 -m http.server 9000"
 ```
 This will create a new service running http server, that will launch immediately.
