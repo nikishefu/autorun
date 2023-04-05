@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION="0.5.0"
+VERSION="0.5.1"
 RED="\e[0;31m"
 GREEN="\e[0;32m"
 CYAN="\e[0;36m"

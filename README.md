@@ -4,12 +4,12 @@ autorun is a script to manage systemd services. It provides a simple command-lin
 ## Installation
 1. Download `.deb` file from releases
 ```
-wget https://github.com/nikishefu/autorun/releases/download/v0.5.0/autorun_0.5.0_amd64.deb
+wget https://github.com/nikishefu/autorun/releases/download/v0.5.1/autorun_0.5.1_amd64.deb
 ```
 
 2. Install via `dpkg`
 ```
-dpkg -i autorun_0.5.0_amd64.deb
+dpkg -i autorun_0.5.1_amd64.deb
 ```
 
 ## Usage
@@ -47,6 +47,6 @@ sudo autorun -r -n mypythonserver
 ```
 
 ## Screenshots
-`autorun -l` highlights services depending on their status:
+`autorun -l` marks services depending on their status:
 
 ![image](https://user-images.githubusercontent.com/37550111/230026224-cff31ef8-1d65-4a47-ac6a-cb6e7ad41406.png)

@@ -1,0 +1,6 @@
+LIST_FILE="/etc/autorun/services.list"
+
+if [ ! -e "$LIST_FILE" ] ; then
+    mkdir /etc/autorun 2>/dev/null
+    touch $LIST_FILE
+fi
