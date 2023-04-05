@@ -1,14 +1,15 @@
 #!/bin/bash
-VERSION="0.4.0"
+VERSION="0.5.0"
 RED="\e[0;31m"
+GREEN="\e[0;32m"
 CYAN="\e[0;36m"
 ENDCOLOR="\e[0m"
 customListPath="/etc/autorun/services.list"
 
 if [ "$#" == 0 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ] ; then
-    echo -e "${CYAN}autorun$ENDCOLOR is a script to manage systemd services\n"
-    echo -e "${CYAN}Usage:$ENDCOLOR autorun [options] \"executable\""
-    echo -e "${CYAN}Options:$ENDCOLOR"
+    echo -e "autorun is a script to manage systemd services\n"
+    echo -e "Usage: autorun [options] \"executable\""
+    echo    "Options:"
     echo -e "\t--help\t\tDisplay this information"
     echo -e "\t-v\t\tDisplay version information"
     echo -e "\t-l\t\tDisplay all system services"
@@ -18,8 +19,8 @@ if [ "$#" == 0 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ] ; then
     echo -e "\t-u username\tRun service as username"
     echo -e "\t-n name\t\tName of service"
     echo -e "\t-d\t\tDelete service"
-    echo -e "\t-r\t\tRun service after creation"
-    echo -e "${CYAN}Note:$ENDCOLOR"
+    echo -e "\t-r\t\tRun service"
+    echo    "Note:"
     echo -e "\t- Some operations require superuser privilege"
     echo -e "\t- Executable can be either a file or a command"
     echo -e "\t- If executable contains spaces, surround this parameter by \""
@@ -46,8 +47,19 @@ if [ "$printVersion" = true ] ; then
     echo "autorun version $VERSION"
     exit 0
 elif [ "$listServices" = true ] ; then
-    echo "All system services:"
-    echo "`ls /etc/systemd/system | grep .service$ | sed 's/^/	/'`"
+    echo -e "All system services (${RED}●$ENDCOLOR not running / ${GREEN}●$ENDCOLOR running):"
+    
+    while read line
+    do
+	if [ -z "`systemctl status $line | sed -n '3p' | grep running`" ] ; then
+	    line="$RED●$ENDCOLOR $line"
+	else
+	    line="$GREEN●$ENDCOLOR $line"
+	fi
+	echo -e "\t$line"
+    done <<< "`ls /etc/systemd/system | grep .service$`"
+
+    # echo "`ls /etc/systemd/system | grep .service$ | sed 's/^/	/'`"
     exit 0
 elif [ "$listCustom" = true ] ; then
     if [ -z "`cat $customListPath`" ] ; then
@@ -55,8 +67,19 @@ elif [ "$listCustom" = true ] ; then
 	echo "Use 'autorun -l' to see all system services"
 	exit 0
     fi
-    echo "Services created with autorun:"
-    echo "`sed 's/^/	/; s/$/.service/' $customListPath`"
+    echo -e "Services created with autorun (${RED}●$ENDCOLOR not running / ${GREEN}●$ENDCOLOR running):"
+
+    while read line
+    do
+	if [ -z "`systemctl status $line | sed -n '3p' | grep running`" ] ; then
+	    line="$RED●$ENDCOLOR $line"
+	else
+	    line="$GREEN●$ENDCOLOR $line"
+	fi
+	echo -e "\t$line.service"
+    done < $customListPath
+
+    # echo "`sed 's/^/	/; s/$/.service/' $customListPath`"
     exit 0
 fi
 
@@ -99,8 +122,21 @@ if [ "$delete" = true ] ; then
 fi
 
 # From here: main option - service creation
+if id -u "$user" >/dev/null 2>&1 || [ -z "$user" ] ; then
+  echo "Creating a service"
+else
+  echo -e "${RED}Error:$ENDCOLOR User '$user' does not exist"
+  exit 1
+fi
+
+
 if [ -e "$filename" ]
 then
+    if [ "$startService" = true ] ; then
+	echo "Starting $name.service"
+	echo -n `systemctl start $name.service`
+	exit 0
+    fi
     echo -e "${RED}Error:$ENDCOLOR $name.service already exists" 1>&2
     exit 1
 fi
