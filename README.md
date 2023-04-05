@@ -4,12 +4,12 @@ Script to manage systemd services
 ## Installation
 1. Download `.deb` file from releases
 ```
-wget https://github.com/nikishefu/autorun/releases/download/v0.4.0/autorun_0.4.0_amd64.deb
+wget https://github.com/nikishefu/autorun/releases/download/v0.5.0/autorun_0.5.0_amd64.deb
 ```
 
 2. Install via `dpkg`
 ```
-dpkg -i autorun_0.4.0_amd64.deb
+dpkg -i autorun_0.5.0_amd64.deb
 ```
 
 ## Usage
@@ -27,7 +27,7 @@ dpkg -i autorun_0.4.0_amd64.deb
         -u username     Run service as username
         -n name         Name of service
         -d              Delete service
-        -r              Run service after creation
+        -r              Run service
 ```
 #### Note
 - Some operations require superuser privilege
@@ -39,3 +39,14 @@ dpkg -i autorun_0.4.0_amd64.deb
 sudo autorun -r -n mypythonserver "python3 -m http.server 9000"
 ```
 This will create a new service running http server, that will launch immediately.
+
+If you forgot -r option in service creation command, you can run your service with another command:
+```
+sudo autorun -n mypythonserver "python3 -m http.server 9000"
+sudo autorun -r -n mypythonserver
+```
+
+## Screenshots
+`autorun -l` highlights services depending on their status:
+
+![image](https://user-images.githubusercontent.com/37550111/230026224-cff31ef8-1d65-4a47-ac6a-cb6e7ad41406.png)
