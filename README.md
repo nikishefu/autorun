@@ -1,5 +1,5 @@
 # autorun
-Script to manage systemd services
+autorun is a script to manage systemd services. It provides a simple command-line interface to view, start, stop, delete and create systemd services.
 
 ## Installation
 1. Download `.deb` file from releases
